@@ -1,0 +1,55 @@
+# Foundational assets that must exist in Elasticsearch before policies are applied.
+# These are referenced by the integrations below.
+foundational_assets:
+  component_templates:
+    - cheese-logs-mappings
+  ingest_pipelines:
+    - cheese-log-parser
+
+# Defines the reusable integration "bundles" and their dependencies.
+integration_definitions:
+  # Standard system metrics, used by all policies.
+  system:
+    fragment: system-1
+  
+  # Nginx integration for web servers.
+  nginx:
+    fragment: nginx-1
+
+  # Custom logs for our special "Cheese" application.
+  # This integration depends on a specific ingest pipeline to parse its logs.
+  cheese_logs:
+    fragment: custom_logs-cheese-1
+    dependencies:
+      ingest_pipelines:
+        - cheese-log-parser
+
+# Defines the Agent Policies that will be created or updated in Fleet.
+agent_policies:
+  # A minimal policy for servers that only need basic host monitoring.
+  "All Linux Servers":
+    description: "Base policy for all standard Linux hosts."
+    integrations:
+      - system
+    _discovered_agents:
+      - server-1.example.com
+
+  # A policy for web servers, layering Nginx on top of the system basics.
+  "Web Servers":
+    description: "Policy for servers running the Nginx integration."
+    integrations:
+      - system
+      - nginx
+    _discovered_agents:
+      - web-server-1.example.com
+      - web-server-2.example.com
+
+  # A specialized policy for our custom application servers.
+  "Cheese App Servers":
+    description: "Policy for our custom Cheese applications, with log parsing."
+    integrations:
+      - system
+      - cheese_logs
+    _discovered_agents:
+      - cheese-server-1.example.com
+

@@ -1,0 +1,14 @@
+{
+  "name": "nginx",
+  "version": "1.15.0",
+  "policy_template": "default",
+  "vars": {
+    "nginx.access.paths": [
+      "/var/log/nginx/access.log*"
+    ],
+    "nginx.error.paths": [
+      "/var/log/nginx/error.log*"
+    ]
+  }
+}
+

@@ -1,0 +1,26 @@
+{
+  "index_patterns": [
+    "logs-cheese_logs-*"
+  ],
+  "template": {
+    "mappings": {
+      "properties": {
+        "cheese": {
+          "properties": {
+            "age_days": {
+              "type": "long"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Custom mappings for the Cheese application logs.",
+    "managed_by": "fleet-iac"
+  }
+}
+

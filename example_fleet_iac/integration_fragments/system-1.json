@@ -1,0 +1,7 @@
+{
+  "name": "system",
+  "version": "1.28.0",
+  "policy_template": "host",
+  "vars": {}
+}
+

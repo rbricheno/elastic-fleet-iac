@@ -1,0 +1,15 @@
+{
+  "name": "custom_logs",
+  "version": "1.10.0",
+  "policy_template": "default",
+  "vars": {
+    "id": "cheese-logs",
+    "data_stream.dataset": "cheese_logs",
+    "paths": [
+      "/var/log/cheese_app/*.log"
+    ],
+    "pipeline": "cheese-log-parser",
+    "custom_namespace": "default"
+  }
+}
+

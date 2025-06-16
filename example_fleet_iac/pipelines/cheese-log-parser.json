@@ -1,0 +1,25 @@
+{
+  "description": "Parses custom cheese logs in the format: [LEVEL] - Age: XX days, Type: YYYY",
+  "processors": [
+    {
+      "grok": {
+        "field": "message",
+        "patterns": [
+          "\\[%{LOGLEVEL:log.level}\\] - Age: %{NUMBER:cheese.age_days:int} days, Type: %{GREEDYDATA:cheese.type}"
+        ],
+        "ignore_missing": true
+      }
+    },
+    {
+      "remove": {
+        "field": "message",
+        "if": "ctx.cheese != null"
+      }
+    }
+  ],
+  "_meta": {
+    "description": "Custom parser for the Cheese application logs.",
+    "managed_by": "fleet-iac"
+  }
+}
+
