@@ -173,4 +173,37 @@ python build_from_state.py --url <kibana_url> --state-dir <directory_name> [--dr
     ```
 This will create the Agent Policies in your new deployment. You can now enroll agents directly into these policies.
 
+## A note regarding baselining
+
+You probably want an API key with a role descriptor that looks like this to do the initial discovery:
+
+```
+POST /_security/api_key
+
+{
+  "name": "fleet_admin_api_key",
+  "role_descriptors": {
+    "fleet_manager_global_role": {
+      "cluster": ["monitor", "read_pipeline"],
+      "indices": [
+        {
+          "names": ["*"],
+          "privileges": ["read", "view_index_metadata"]
+        }
+      ],
+      "applications": [
+        {
+          "application": "kibana-.kibana",
+          "privileges": [
+            "feature_fleetv2.all",
+            "feature_fleet.all"
+          ],
+          "resources": ["*"]
+        }
+      ]
+    }
+  }
+}
+```
+
 License: MIT
