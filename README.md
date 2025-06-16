@@ -206,4 +206,6 @@ POST /_security/api_key
 }
 ```
 
+Written mostly by Google AI studio, thanks google.
+
 License: MIT
