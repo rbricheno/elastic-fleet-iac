@@ -82,6 +82,13 @@ agent_policies:
       - server-2
 ```
 
+## How it works
+
+If you set up a fleet like this, data streams and their supporting indexes will be created automatically.
+
+![A rendering of a Mermaid graph which shows the relationships between the fleet definition components. The source of the graph is included in the 'docs' folder.](https://github.com/rbricheno/elastic-fleet-iac/blob/main/docs/elastic-fleet-diagram.png?raw=true)
+
+
 ## Scope and Best Practices
 
 This tool is designed to manage the **definition** of your Agent Policies. It does not manage:
