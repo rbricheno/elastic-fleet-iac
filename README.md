@@ -2,6 +2,8 @@
 
 A set of Python utilities and a defined structure to manage Elastic Agent policies, integrations, and their supporting Elasticsearch components (ingest pipelines, component templates).
 
+Targeted at people who want to send lots of "syslog"-type logs to Elastic Cloud using Elastic Agents managed by Fleet.
+
 ## Core Concepts
 
 The system is built around a "Read -> Modify -> Write" loop:
