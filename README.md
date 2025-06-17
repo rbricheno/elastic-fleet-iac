@@ -284,13 +284,44 @@ POST /_security/api_key
 }
 ```
 
+If you're going to actually build the cluster from an IAC configuration, you need to add in some manage rights, like this:
+
+```
+POST /_security/api_key
+
+{
+  "name": "fleet_builder_api_key",
+  "role_descriptors": {
+    "fleet_iac_builder_inline_role": {
+      "cluster": [
+        "manage_pipeline", 
+        "manage_component_template"
+      ],
+      "kibana": [
+        {
+          "spaces": [
+            "default"
+          ],
+          "feature": {
+            "fleet": [
+              "all"
+            ]
+          },
+          "base": []
+        }
+      ]
+    }
+  }
+}
+```
+
 For provisioning enrollment tokens, a Kibana-level API key like this will do the job:
 
 ```
 POST /_security/api_key
 
 {
-  "name": "fleet_enrollment_automation_key",
+  "name": "fleet_enrollment_api_key",
   "role_descriptors": {
     "fleet_token_creator_inline_role": {
       "kibana": [
