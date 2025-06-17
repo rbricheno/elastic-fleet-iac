@@ -1,0 +1,43 @@
+---
+config:
+  layout: fixed
+---
+flowchart TD
+ subgraph Elasticsearch["Elasticsearch"]
+        F@{ label: "Data Stream 'logs-cheese_logs-default' exists?" }
+        E["Elasticsearch"]
+        G@{ label: "Find matching Index Template<br>(e.g., pattern 'logs-cheese_logs-*')" }
+        H@{ label: "Create new Data Stream +<br>backing index '.ds-..-000001'<br>using template rules" }
+        J@{ label: "Find current write index<br>(e.g., '.ds-..-000002')" }
+        Q["Run Ingest Pipeline<br>(e.g., cheese-log-parser)"]
+        I["Index Final Document"]
+  end
+ subgraph Configuration["Configuration"]
+        K["fleet_definition.yaml"]
+        L["Integration Fragment<br>custom_logs-cheese-1.json"]
+        N["Component Template<br>cheese-logs-mappings.json"]
+        P["Ingest Pipeline<br>cheese-log-parser.json"]
+        B("Agent")
+  end
+    A["Log File on Server"] -- Elastic Agent reads --> B
+    B -- "Integration config sets<br>type, dataset, namespace<br>&amp; pipeline='cheese-log-parser'" --> C@{ label: "Agent tags data for stream<br>'logs-cheese_logs-default'" }
+    C -- Sends to --> D["Fleet Server"]
+    D -- Forwards to --> E
+    E --> F
+    F -- No --> G
+    G --> H
+    F -- Yes --> J
+    H --> Q
+    J --> Q
+    Q --> I
+    K -- Defines --> L & N & P
+    L -- references 'pipeline' --> P
+    L -- Configures --> B
+    N -- Used by --> G
+    P -- Used at execution time by --> Q
+    C@{ shape: rounded}
+    F@{ shape: diamond}
+    G@{ shape: diamond}
+    H@{ shape: rect}
+    J@{ shape: rect}
+
