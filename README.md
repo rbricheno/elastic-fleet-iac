@@ -173,9 +173,87 @@ python build_from_state.py --url <kibana_url> --state-dir <directory_name> [--dr
     ```
 This will create the Agent Policies in your new deployment. You can now enroll agents directly into these policies.
 
-## A note regarding baselining
+## Using the policies (enrolling agents)
 
-You probably want an API key with a role descriptor that looks like this to do the initial discovery:
+Once policies are created, you'll need to configure your agents with an enrollment token that matches the desired Agent Policy.
+
+Getting this token is a two step API call. First you need to find the ID of the Agent Policy based on its name, then you need to request an enrollment token using that Agent Policy ID.
+
+Get the policy like this:
+
+```
+# Make sure your Kibana URL and API Key are set
+KIBANA_URL="https://your-deployment.kb.elastic-cloud.com"
+export ELASTIC_API_KEY="YourBase64EncodedKeyHere"
+
+curl -X GET \
+  -H "Authorization: ApiKey $ELASTIC_API_KEY" \
+  -H "kbn-xsrf: true" \
+  "$KIBANA_URL/api/fleet/agent_policies?perPage=100"
+```
+
+It will give you a response with an ID in it like this:
+```
+{
+  "items": [
+    // ... other policies
+    {
+      "id": "01a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6",  // <-- This is the policy_id you need!
+      "name": "Web Servers",
+      "description": "Policy for servers running the Nginx integration.",
+      // ... more fields
+    }
+  ]
+}
+```
+
+Now use that ID to create an enrollment token:
+
+```
+# The policy ID we found in the previous step
+POLICY_ID="01a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6"
+
+curl -X POST \
+  -H "Authorization: ApiKey $ELASTIC_API_KEY" \
+  -H "kbn-xsrf: true" \
+  -H "Content-Type: application/json" \
+  "$KIBANA_URL/api/fleet/enrollment-api-keys" \
+  -d '{
+    "name": "Web Servers - Terraform Key",
+    "policy_id": "'"$POLICY_ID"'"
+  }'
+```
+
+The response from the API contains the token:
+
+```
+{
+  "item": {
+    "id": "some-unique-token-id",
+    "active": true,
+    "policy_id": "01a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6",
+    "name": "Web Servers - Terraform Key",
+    "api_key": "aVeryLongBase64EncodedEnrollmentKeyString...", // <-- This is the token!
+    "api_key_id": "another-unique-id",
+    "created_on": "2023-10-27T12:00:00.000Z",
+    "type": "PERMANENT"
+  }
+}
+```
+
+You can now use that token to enroll your agent:
+
+```
+sudo /usr/bin/elastic-agent enroll \
+  --url=https://<your-fleet-server-url>:8220 \
+  --enrollment-token=aVeryLongBase64EncodedEnrollmentKeyString...
+```
+
+## Role descriptors for API keys
+
+You need quite a lot of rights, and a cluster-level API key, to read all the relevant parts of the fleet configuration.
+
+An API key with a role descriptor that looks like this should work for the initial discovery:
 
 ```
 POST /_security/api_key
@@ -206,6 +284,33 @@ POST /_security/api_key
 }
 ```
 
-Written mostly by Google AI studio, thanks google.
+For provisioning enrollment tokens, a Kibana-level API key like this will do the job:
+
+```
+POST /_security/api_key
+
+{
+  "name": "fleet_enrollment_automation_key",
+  "role_descriptors": {
+    "fleet_token_creator_inline_role": {
+      "kibana": [
+        {
+          "spaces": [
+            "default"
+          ],
+          "feature": {
+            "fleet": [
+              "all"
+            ]
+          },
+          "base": []
+        }
+      ]
+    }
+  }
+}
+```
+
+Written with help from Google AI studio, thanks google.
 
 License: MIT
